@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kartlarım</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Kartlarım">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#0b6e4f">
+<style>
+:root{--bg:#f2f5f1;--surface:#fff;--ink:#17211c;--muted:#5d6b63;--accent:#0b6e4f;--on-accent:#fff;--line:#d9e0da;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111815;--surface:#1b2520;--ink:#eef3ef;--muted:#9aa89f;--accent:#4cc79b;--on-accent:#06251a;--line:#2b3830}}
+:root[data-theme="dark"]{--bg:#111815;--surface:#1b2520;--ink:#eef3ef;--muted:#9aa89f;--accent:#4cc79b;--on-accent:#06251a;--line:#2b3830}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif}
+main{max-width:520px;margin:0 auto;padding:20px 16px 100px}
+h1{font-size:28px;margin:8px 0 4px;letter-spacing:-.5px}
+.sub{color:var(--muted);margin:0 0 20px;font-size:15px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px;cursor:pointer;text-align:left;font:inherit;color:inherit}
+.card:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.card .thumb{aspect-ratio:1;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.card img{max-width:100%;max-height:100%;object-fit:contain}
+.card b{display:block;margin-top:8px;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:28px 18px;text-align:center;color:var(--muted)}
+.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--accent);color:var(--on-accent);border:0;border-radius:999px;padding:15px 28px;font:inherit;font-weight:700;font-size:16px;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-end;justify-content:center;z-index:5}
+.sheet.open{display:flex}
+.panel{background:var(--surface);width:100%;max-width:520px;border-radius:20px 20px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px))}
+.panel h2{margin:0 0 14px;font-size:20px}
+label{display:block;font-size:14px;color:var(--muted);margin:12px 0 6px}
+input[type=text]{width:100%;padding:13px;font:inherit;font-size:16px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+.pick{display:flex;align-items:center;justify-content:center;gap:8px;border:1px dashed var(--accent);color:var(--accent);border-radius:10px;padding:16px;font-weight:700;cursor:pointer}
+.pick input{display:none}
+#prev{display:none;max-width:100%;max-height:180px;margin:12px auto 0;background:#fff;border-radius:8px}
+.row{display:flex;gap:10px;margin-top:18px}
+.btn{flex:1;padding:14px;border-radius:10px;font:inherit;font-weight:700;font-size:16px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.danger{color:#b3261e}
+.err{color:#b3261e;font-size:14px;margin-top:10px;min-height:18px}
+.show{position:fixed;inset:0;background:#fff;color:#000;z-index:10;display:none;flex-direction:column;align-items:center;justify-content:center;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.show.open{display:flex}
+.show h2{margin:0 0 14px;font-size:22px}
+.show img{width:100%;max-width:440px;max-height:62vh;object-fit:contain}
+.show .row{width:100%;max-width:440px}
+.show .btn{background:#eee;color:#000;border-color:#ccc}
+.show p{color:#555;font-size:14px;margin:12px 0 0;text-align:center}
+</style>
+</head>
+<body>
+<main>
+  <h1>Kartlarım</h1>
+  <p class="sub">Market ve mağaza indirim kartları ile QR kodların tek yerde.</p>
+  <div id="list"></div>
+</main>
+<button class="fab" id="add">+ Kart ekle</button>
+
+<div class="sheet" id="sheet">
+  <div class="panel">
+    <h2 id="ptitle">Yeni kart</h2>
+    <label for="name">Kart adı</label>
+    <input type="text" id="name" placeholder="Örn. Migros Money" autocomplete="off">
+    <label>QR kod veya barkod görseli</label>
+    <label class="pick" style="margin:0">Fotoğraf seç veya çek
+      <input type="file" id="file" accept="image/*">
+    </label>
+    <img id="prev" alt="Seçilen görsel">
+    <div class="err" id="err"></div>
+    <div class="row">
+      <button class="btn" id="cancel">Vazgeç</button>
+      <button class="btn primary" id="save">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<div class="show" id="show">
+  <h2 id="stitle"></h2>
+  <img id="simg" alt="Kart">
+  <p>Ekran parlaklığını artırın ve kodu okuyucuya yaklaştırın.</p>
+  <div class="row">
+    <button class="btn danger" id="del">Sil</button>
+    <button class="btn" id="close">Kapat</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var KEY="kartlarim-v1", cards=[], cur=null, img=null;
+  var $=function(i){return document.getElementById(i)};
+  function load(){try{cards=JSON.parse(localStorage.getItem(KEY)||"[]")||[]}catch(e){cards=[]}}
+  function store(){try{localStorage.setItem(KEY,JSON.stringify(cards));return true}catch(e){return false}}
+  function render(){
+    var l=$("list");l.innerHTML="";
+    if(!cards.length){l.innerHTML='<div class="empty">Henüz kart yok. “Kart ekle” ile ilk kartınızı ekleyin.</div>';return}
+    var g=document.createElement("div");g.className="grid";
+    cards.forEach(function(c){
+      var b=document.createElement("button");b.className="card";
+      var t=document.createElement("div");t.className="thumb";
+      var im=document.createElement("img");im.src=c.img;im.alt="";t.appendChild(im);
+      var n=document.createElement("b");n.textContent=c.name;
+      b.appendChild(t);b.appendChild(n);
+      b.onclick=function(){open_(c.id)};
+      g.appendChild(b);
+    });
+    l.appendChild(g);
+  }
+  function open_(id){
+    cur=id;var c=cards.filter(function(x){return x.id===id})[0];if(!c)return;
+    $("stitle").textContent=c.name;$("simg").src=c.img;$("show").classList.add("open");
+    try{if(navigator.wakeLock)navigator.wakeLock.request("screen").catch(function(){})}catch(e){}
+  }
+  $("close").onclick=function(){$("show").classList.remove("open")};
+  $("del").onclick=function(){
+    if(!confirm("Bu kart silinsin mi?"))return;
+    cards=cards.filter(function(x){return x.id!==cur});store();render();$("show").classList.remove("open");
+  };
+  function reset(){img=null;$("name").value="";$("file").value="";$("prev").style.display="none";$("err").textContent=""}
+  $("add").onclick=function(){reset();$("sheet").classList.add("open");$("name").focus()};
+  $("cancel").onclick=function(){$("sheet").classList.remove("open")};
+  $("file").onchange=function(e){
+    var f=e.target.files[0];if(!f)return;
+    var r=new FileReader();
+    r.onload=function(){
+      var im=new Image();
+      im.onload=function(){
+        var m=900,s=Math.min(1,m/Math.max(im.width,im.height));
+        var cv=document.createElement("canvas");cv.width=Math.round(im.width*s);cv.height=Math.round(im.height*s);
+        var x=cv.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,cv.width,cv.height);x.drawImage(im,0,0,cv.width,cv.height);
+        img=cv.toDataURL("image/jpeg",0.92);
+        $("prev").src=img;$("prev").style.display="block";$("err").textContent="";
+      };
+      im.onerror=function(){$("err").textContent="Görsel açılamadı. Başka bir dosya deneyin."};
+      im.src=r.result;
+    };
+    r.readAsDataURL(f);
+  };
+  $("save").onclick=function(){
+    var n=$("name").value.trim();
+    if(!n){$("err").textContent="Kart adını yazın.";return}
+    if(!img){$("err").textContent="Bir QR kod veya barkod görseli seçin.";return}
+    cards.push({id:String(Date.now()),name:n,img:img});
+    if(!store()){cards.pop();$("err").textContent="Kaydedilemedi: depolama dolu olabilir. Eski bir kartı silin.";return}
+    $("sheet").classList.remove("open");render();
+  };
+  load();render();
+  if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}
+})();
+</script>
+</body>
+</html>
